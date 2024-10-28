@@ -3,21 +3,25 @@ import tensorflow as tf
 from models.TCMH import TCMH
 from utils.data_loader import data_generator
 import config
-import logging
+from utils.logging import loggerFactory
 
 # Logging setup
-logging.basicConfig(
-    level=logging.DEBUG,  # Уровень логгирования
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Формат сообщения
-    filename='logs/train.log',  # Имя файла для логов
-    filemode='w'  # Режим записи (a - добавление, w - перезапись)
-)
+train_logger = loggerFactory(
+    name='train_logger',
+    file='logs/train.log'
+) 
 
-train_logger = logging.getLogger(name="train_logger")
+model_logger = loggerFactory(
+    name='model_logger',
+    file='logs/model.log'
+)
 
 # Define the model
 B = config.BATCH_SIZE  # Batch size 
-model = TCMH(input_shape=config.INPUT_SHAPE)
+model = TCMH(
+    input_shape=config.INPUT_SHAPE,
+    logger=model_logger
+)
 
 train_logger.info('Created model')
 

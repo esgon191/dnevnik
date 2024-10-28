@@ -1,17 +1,14 @@
 import pandas as pd
 import numpy as np 
 import logging
+from utils.logging import loggerFactory
 
 # Logging setup
-data_generator_logger = logging.getLogger(name='data_generator_logger')
+data_generator_logger = loggerFactory(
+    name='data_generator_logger',
+    file='logs/train_genrator.log'
+)
 
-data_generator_handler = logging.FileHandler('logs/train_generator.log', mode='w')
-data_generator_handler.setLevel(logging.DEBUG)
-
-data_generator_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-data_generator_handler.setFormatter(data_generator_formatter)
-
-data_generator_logger.addHandler(data_generator_handler)
 
 # Generator
 def data_generator(X_file_path, y_file_path, batch_size, sequence_length, x_columns, y_column):

@@ -2,8 +2,9 @@ import tensorflow as tf
 from tensorflow.keras import layers, models
 
 class TCMH(models.Model):
-    def __init__(self, input_shape, num_sensors=10, num_heads=8, filters=32, output_units=8):
+    def __init__(self, input_shape, logger, num_sensors=10, num_heads=8, filters=32, output_units=8):
         super(TCMH, self).__init__()
+        self.logger = logger
         self.num_sensors = num_sensors
         self.input_layers = [layers.Input(shape=input_shape) for _ in range(num_sensors)]
         
@@ -24,27 +25,36 @@ class TCMH(models.Model):
         
         # Output Layer
         self.output_layer = layers.Dense(units=output_units, activation='softmax')
+        self.logger.info('initialized')
 
     def __call__(self, inputs):
         conv_outputs = []
+        self.logger.debug('conv1d')
         for i in range(self.num_sensors):
             x = self.conv1_layers[i](inputs[i])
             x = self.conv2_layers[i](x)
             x = self.pool_layers[i](x)
             conv_outputs.append(x)
         
+        self.logger.debug('concatenation')
         concat_layer = layers.Concatenate(axis=-1)(conv_outputs)
         
         # Multi-Head Attention
+        self.logger.debug('multi-head attention')
         x = self.multi_head_attention(concat_layer, concat_layer)
         
         # Convolutional Layer
+        self.logger.debug('convolution')
         x = self.conv_layer(x)
+
+        self.logger.debug('max pooling')
         x = self.max_pool(x)
         
         # Global Average Pooling
+        self.logger.debug('global average pooling')
         x = self.global_avg_pool(x)
         
         # Output Layer
+        self.logger.info('returning')
         return self.output_layer(x)
 
