@@ -1,4 +1,10 @@
 BATCH_SIZE = 32
 EPOCHS = 10
-train_file_paths = ["path/to/train/data1", "path/to/train/data2"]  # Replace with your actual file paths
-test_file_paths = ["path/to/test/data1", "path/to/test/data2"]  # Replace with your actual file paths
+X_train_file_path = "data/pipline_test/X_train.csv"
+y_train_file_path = "data/pipline_test/y_train.csv"
+
+X_val_file_path = "data/pipline_test/X_val.csv"
+y_val_file_path = "data/pipline_test/y_val.csv"
+
+X_test_file_path = "data/pipline_test/X_test.csv"
+y_test_file_path = "data/pipline_test/y_test.csv"
