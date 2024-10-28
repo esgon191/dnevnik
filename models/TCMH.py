@@ -25,7 +25,7 @@ class TCMH(models.Model):
         # Output Layer
         self.output_layer = layers.Dense(units=output_units, activation='softmax')
 
-    def call(self, inputs):
+    def __call__(self, inputs):
         conv_outputs = []
         for i in range(self.num_sensors):
             x = self.conv1_layers[i](inputs[i])

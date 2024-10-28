@@ -1,5 +1,7 @@
 BATCH_SIZE = 32
 EPOCHS = 10
+INPUT_SHAPE = (BATCH_SIZE, 500, 1)
+
 X_train_file_path = "data/pipline_test/X_train.csv"
 y_train_file_path = "data/pipline_test/y_train.csv"
 

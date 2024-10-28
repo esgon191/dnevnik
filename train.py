@@ -16,9 +16,8 @@ logging.basicConfig(
 train_logger = logging.getLogger(name="train_logger")
 
 # Define the model
-B = config.BATCH_SIZE  # Batch size
-input_shape = (500, 1)
-model = TCMH(input_shape=input_shape)
+B = config.BATCH_SIZE  # Batch size 
+model = TCMH(input_shape=config.INPUT_SHAPE)
 
 train_logger.info('Created model')
 
@@ -28,7 +27,7 @@ model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=
 train_logger.info('Compiled model')
 
 # Summary of the model
-model.build([tf.TensorShape((None, 500, 1)) for _ in range(10)])
+model.build([tf.TensorShape((500, 1)) for _ in range(10)])
 model.summary()
 
 train_logger.info('Model builded')
@@ -38,7 +37,7 @@ train_logger.info('Dataset creation')
 train_dataset = tf.data.Dataset.from_generator(
     lambda: data_generator(config.X_train_file_path, config.y_train_file_path, B),
     output_signature=(
-        tf.TensorSpec(shape=(10, None, 500, 1), dtype=tf.float32),
+        tuple(tf.TensorSpec(shape=config.INPUT_SHAPE, dtype=tf.float32) for _ in range(10)),
         tf.TensorSpec(shape=(None,), dtype=tf.int32),
     )
 ).prefetch(tf.data.experimental.AUTOTUNE)
@@ -54,8 +53,8 @@ train_logger.info('Testing started')
 test_dataset = tf.data.Dataset.from_generator(
     lambda: data_generator(config.X_test_file_path, config.y_test_file_path, B),
     output_signature=(
-        [tf.TensorSpec(shape=(None, 500, 1), dtype=tf.float32) for _ in range(10)],
-        tf.TensorSpec(shape=(None,), dtype=tf.int32),
+        tuple(tf.TensorSpec(shape=config.INPUT_SHAPE, dtype=tf.float32) for _ in range(10)),
+        tf.TensorSpec(shape=(), dtype=tf.int32),
     )
 ).prefetch(tf.data.experimental.AUTOTUNE)
 
