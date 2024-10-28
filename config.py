@@ -1,6 +1,15 @@
 BATCH_SIZE = 32
+SEQUENCE_LENGTH = 500
 EPOCHS = 10
-INPUT_SHAPE = (BATCH_SIZE, 500, 1)
+INPUT_SHAPE = (SEQUENCE_LENGTH, 1)
+X_COLUMNS = [
+    'acceleration_x', 'acceleration_y', 'acceleration_z', 
+    'gyro_x', 'gyro_y', 'gyro_z', 
+    'magnetometer_x', 'magnetometer_y', 'magnetometer_z', 
+    'pressure'
+]
+
+Y_COLUMN = ['coarse']
 
 X_train_file_path = "data/pipline_test/X_train.csv"
 y_train_file_path = "data/pipline_test/y_train.csv"

@@ -13,11 +13,23 @@ data_generator_handler.setFormatter(data_generator_formatter)
 data_generator_logger.addHandler(data_generator_handler)
 
 # Generator
-def data_generator(X_file_path, y_file_path, batch_size):
+def data_generator(X_file_path, y_file_path, sequence_length, x_columns, y_column):
     while True:
-        for X_chunk, y_chunk in zip(pd.read_csv(X_file_path, chunksize=batch_size), pd.read_csv(y_file_path, chunksize=batch_size)):
-            X_batch = tuple(X_chunk[column].values for column in X_chunk.columns)
+        X_generator = pd.read_csv(
+            X_file_path, 
+            chunksize=sequence_length,
+            usecols=x_columns
+            )
+        y_generator = pd.read_csv(
+            y_file_path, 
+            chunksize=sequence_length,
+            usecols=y_column
+            )
+
+
+        for X_chunk, y_chunk in zip(X_generator, y_generator):
+            X_batch = tuple(X_chunk[column].values.reshape(-1, 500, 1) for column in X_chunk.columns)
             y_batch = y_chunk["coarse"].values
             yield (X_batch, y_batch)
 
-            data_generator_logger.debug('Yeilded chunk')
+            data_generator_logger.debug(f'Yeilded chunk {len(X_batch)}, {X_batch[0].shape}, {len(X_batch)}, {y_batch.shape}')
