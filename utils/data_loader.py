@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np 
 import logging
 
 # Logging setup
@@ -13,7 +14,7 @@ data_generator_handler.setFormatter(data_generator_formatter)
 data_generator_logger.addHandler(data_generator_handler)
 
 # Generator
-def data_generator(X_file_path, y_file_path, sequence_length, x_columns, y_column):
+def data_generator(X_file_path, y_file_path, batch_size, sequence_length, x_columns, y_column):
     while True:
         X_generator = pd.read_csv(
             X_file_path, 
@@ -26,10 +27,21 @@ def data_generator(X_file_path, y_file_path, sequence_length, x_columns, y_colum
             usecols=y_column
             )
 
+        X_batch = list()
+        y_batch = list()
 
-        for X_chunk, y_chunk in zip(X_generator, y_generator):
-            X_batch = tuple(X_chunk[column].values.reshape(-1, 500, 1) for column in X_chunk.columns)
-            y_batch = y_chunk["coarse"].values
-            yield (X_batch, y_batch)
+        for i in range(batch_size):
+            X_chunk = next(X_generator).values.reshape(1, 500, 10)
+            y_chunk = next(y_generator).values.reshape(1, 500, 1)
 
-            data_generator_logger.debug(f'Yeilded chunk {len(X_batch)}, {X_batch[0].shape}, {len(X_batch)}, {y_batch.shape}')
+            X_batch.append(X_chunk)
+            y_batch.append(y_chunk)
+
+        X_batch = np.concatenate(X_batch, axis=0)
+        y_batch = np.concatenate(y_batch, axis=0)
+
+        X_batch = tuple(np.split(X_batch, axis=2, indices_or_sections=10))
+        
+        yield (X_batch, y_batch)
+
+        data_generator_logger.debug('yileded chunk')
