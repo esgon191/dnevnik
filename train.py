@@ -2,6 +2,11 @@ import logging.config
 import tensorflow as tf
 from models.TCMH import TCMH
 from utils.data_loader import data_generator
+import utils.data_loader
+
+import importlib
+importlib.reload(utils.data_loader)
+
 import config
 from utils.logging import loggerFactory
 
@@ -38,16 +43,17 @@ train_logger.info('Model builded')
 
 output_signature = (
     tuple(tf.TensorSpec(shape=(config.BATCH_SIZE, *config.INPUT_SHAPE), dtype=tf.float32) for _ in range(10)),
-    tf.TensorSpec(shape=(config.BATCH_SIZE, config.SEQUENCE_LENGTH, 1), dtype=tf.int32),
+    tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
 )
 
 data_handler = lambda : data_generator(
     config.X_train_file_path, 
     config.y_train_file_path,
+    config.X_COLUMNS,
+    config.Y_COLUMN,
     config.BATCH_SIZE, 
     config.SEQUENCE_LENGTH,
-    config.X_COLUMNS,
-    config.Y_COLUMN
+    config.OVERLAP
 )
 
 train_logger.info('Dataset creation')
