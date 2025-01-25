@@ -22,6 +22,14 @@ model_logger = loggerFactory(
     name='model_logger',
     file='logs/model.log'
 )
+# Настройка tensorflow на работу на 10 ядрах
+# Ограничить количество потоков
+tf.config.threading.set_inter_op_parallelism_threads(10)
+tf.config.threading.set_intra_op_parallelism_threads(10)
+
+# Проверить настройки
+print("Inter-Op Threads:", tf.config.threading.get_inter_op_parallelism_threads())
+print("Intra-Op Threads:", tf.config.threading.get_intra_op_parallelism_threads())
 
 # Define the model
 B = config.BATCH_SIZE  # Batch size 
