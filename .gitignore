@@ -29,10 +29,15 @@ tensorflow/contrib/cmake/_build/
 /estimator_api_init_files_list.txt
 *.whl
 dist
+dbconfig.py
 
 # Data
 /data/*.csv
 /data/*.xlsx
+/data/*
+
+# Logs
+/logs/*
 
 # Android
 .gradle
