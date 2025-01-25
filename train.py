@@ -82,7 +82,7 @@ train_logger.info('Learning started')
 model.fit(train_dataset, epochs=config.EPOCHS, steps_per_epoch=len(config.X_train_file_path) // B)
 
 train_logger.info('Learning ended')
-model.save('.')
+model.save('./')
 # Evaluation of the model
 train_logger.info('Testing started')
 test_dataset = tf.data.Dataset.from_generator(
