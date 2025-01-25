@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, models
 
 class TCMH(models.Model):
-    def __init__(self, input_shape, logger, num_sensors=10, num_heads=8, filters=32, output_units=8):
+    def __init__(self, input_shape, logger, num_sensors=10, num_heads=8, filters=32, output_units=9):
         super(TCMH, self).__init__()
         self.logger = logger
         self.num_sensors = num_sensors

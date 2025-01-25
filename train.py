@@ -3,11 +3,13 @@ import tensorflow as tf
 from models.TCMH import TCMH
 from utils.data_loader import data_generator
 import utils.data_loader
+from utils.sql_loader import SqlLoader
 
 import importlib
 importlib.reload(utils.data_loader)
 
 import config
+import dbconfig
 from utils.logging import loggerFactory
 
 # Logging setup
@@ -46,15 +48,19 @@ output_signature = (
     tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
 )
 
-data_handler = lambda : data_generator(
-    config.X_train_file_path, 
-    config.y_train_file_path,
-    config.X_COLUMNS,
-    config.Y_COLUMN,
-    config.BATCH_SIZE, 
-    config.SEQUENCE_LENGTH,
-    config.OVERLAP
+sql_iter_instance = SqlLoader(
+    host=dbconfig.HOST,
+    port='5432',
+    database=dbconfig.DB,
+    user=dbconfig.POSTGRES_USER,
+    password=dbconfig.POSTGRES_PASSWORD,
+    table='train_std',
+    batch_size=config.BATCH_SIZE,
+    X_columns=config.X_COLUMNS,
+    y_columns=config.Y_COLUMN
 )
+
+data_handler = lambda : iter(sql_iter_instance)
 
 train_logger.info('Dataset creation')
 # Create Dataset
@@ -68,7 +74,7 @@ train_logger.info('Learning started')
 model.fit(train_dataset, epochs=config.EPOCHS, steps_per_epoch=len(config.X_train_file_path) // B)
 
 train_logger.info('Learning ended')
-
+model.save('.')
 # Evaluation of the model
 train_logger.info('Testing started')
 test_dataset = tf.data.Dataset.from_generator(

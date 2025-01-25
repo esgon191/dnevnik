@@ -13,13 +13,20 @@ class SqlLoader:
                  database : str, 
                  user : str, 
                  password : str,
-                 table : str):
+                 table : str,
+                 batch_size : int,
+                 X_columns : list,
+                 y_columns: list):
         self.host = host
         self.port = port
         self.database = database
         self.user = user
         self.password = password
         self.table = table
+        self.batch_size = batch_size
+        self.X_columns = X_columns
+        self.y_columns = y_columns
+
         self.current = 0
 
         # Движок подключения к бд
@@ -43,15 +50,34 @@ class SqlLoader:
 
     def __next__(self):
         """Следующий элемент итерации - данные для текущего batch_id"""
-        if self.current < len(self.batch_ids):
-            # Получаем текущий batch_id
-            batch_id = self.batch_ids[self.current]
-            self.current += 1
+        X_batch = list()
+        y_batch = list()
+            
+        for i in range(self.batch_size):
+            if self.current < len(self.batch_ids):
+                # Получаем текущий batch_id
+                batch_id = self.batch_ids[self.current]
+                self.current += 1
 
-            # Выполняем запрос для текущего batch_id
-            query = f"SELECT * FROM {self.table} WHERE batch_id = '{batch_id}';"
-            result = pd.read_sql_query(query, self.engine)
+                # Выполняем запрос для текущего batch_id
+                query = f"SELECT * FROM {self.table} WHERE batch_id = '{batch_id}';"
+                result = pd.read_sql_query(query, self.engine)
+            else:
+                raise StopIteration
 
-            return result  # Возвращаем результат запроса в виде DataFrame
-        else:
-            raise StopIteration
+            X_chunk = result[self.X_columns].values
+            y_chunk = result[self.y_columns].values[-1]
+
+            X_chunk = X_chunk.reshape(1, 500, 10)        
+            X_batch.append(X_chunk.copy())
+
+            y_chunk = y_chunk.reshape(1, 1)
+            y_batch.append(y_chunk.copy())
+
+
+        X_batch = np.concatenate(X_batch, axis=0)
+        y_batch = np.concatenate(y_batch, axis=0)
+
+        X_batch = tuple(np.split(X_batch, axis=2, indices_or_sections=10))
+        
+        return (X_batch, y_batch)

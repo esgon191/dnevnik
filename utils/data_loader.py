@@ -12,37 +12,29 @@ data_generator_logger = loggerFactory(
 
 # Generator
 def data_generator(X_file_path, y_file_path, x_columns, y_column, batch_size, sequence_length, overlap):
-    reads_per_chunk = sequence_length//overlap
+    #reads_per_chunk = sequence_length//overlap
 
     while True:
         X_generator = pd.read_csv(
             X_file_path, 
-            chunksize=overlap,
+            chunksize=sequence_length,
             usecols=x_columns
             )
         y_generator = pd.read_csv(
             y_file_path, 
-            chunksize=overlap,
+            chunksize=sequence_length,
             usecols=y_column
             )
 
         X_batch = list()
         y_batch = list()
         
-        X_chunk = next(X_generator).values
-        y_chunk = next(y_generator).values
         for i in range(batch_size):
-            X_readed = 0
-
-            for i in range(reads_per_chunk-1):
-                X_readed = next(X_generator).values     
-                X_chunk = np.concatenate((X_chunk, X_readed), axis=0)
-
-                y_chunk = next(y_generator).values[-1]     
+            X_chunk = next(X_generator).values
+            y_chunk = next(y_generator).values[-1]
 
             X_chunk = X_chunk.reshape(1, 500, 10)        
             X_batch.append(X_chunk.copy())
-            X_chunk = X_readed
 
             y_chunk = y_chunk.reshape(1, 1)
             y_batch.append(y_chunk.copy())
