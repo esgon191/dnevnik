@@ -45,7 +45,9 @@ class SqlLoader:
         return engine 
     
     def __iter__(self):
-        """Итератор возвращает сам себя"""
+        """Итератор возвращает сам себя, предварительно перемешивая данные и обновляя счетчик"""
+        self.current = 0
+        np.random.shuffle(self.batch_ids)
         return self
 
     def __next__(self):
