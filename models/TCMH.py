@@ -76,4 +76,8 @@ class TCMH(models.Model):
             "output_units": self.output_units,
         })
         return config
+    
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
 
