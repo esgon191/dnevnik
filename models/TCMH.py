@@ -4,6 +4,14 @@ from tensorflow.keras import layers, models
 class TCMH(models.Model):
     def __init__(self, input_shape, logger, num_sensors=10, num_heads=8, filters=32, output_units=9):
         super(TCMH, self).__init__()
+
+        # Сохранение параметров модели
+        self.input_shape_param = input_shape
+        self.num_sensors = num_sensors
+        self.num_heads = num_heads
+        self.filters = filters
+        self.output_units = output_units
+
         self.logger = logger
         self.num_sensors = num_sensors
         self.input_layers = [layers.Input(shape=input_shape) for _ in range(num_sensors)]
@@ -57,4 +65,15 @@ class TCMH(models.Model):
         # Output Layer
         self.logger.info('returning')
         return self.output_layer(x)
+    
+    def get_config(self):
+        config = super(TCMH, self).get_config()
+        config.update({
+            "input_shape": self.input_shape_param,
+            "num_sensors": self.num_sensors,
+            "num_heads": self.num_heads,
+            "filters": self.filters,
+            "output_units": self.output_units,
+        })
+        return config
 
