@@ -10,18 +10,14 @@ importlib.reload(utils.data_loader)
 
 import config
 import dbconfig
-from utils.logging import loggerFactory
+from utils.logging import logger_factory
 
 # Logging setup
-train_logger = loggerFactory(
+train_logger = logger_factory(
     name='train_logger',
     file='logs/train.log'
 ) 
 
-model_logger = loggerFactory(
-    name='model_logger',
-    file='logs/model.log'
-)
 # Настройка tensorflow на работу на 10 ядрах
 # Ограничить количество потоков
 tf.config.threading.set_inter_op_parallelism_threads(10)
@@ -34,8 +30,7 @@ print("Intra-Op Threads:", tf.config.threading.get_intra_op_parallelism_threads(
 # Define the model
 B = config.BATCH_SIZE  # Batch size 
 model = TCMH(
-    input_shape=config.INPUT_SHAPE,
-    logger=model_logger
+    input_shape=config.INPUT_SHAPE
 )
 
 train_logger.info('Created model')
@@ -82,13 +77,7 @@ train_logger.info('Learning started')
 model.fit(train_dataset, epochs=config.EPOCHS, steps_per_epoch=len(config.X_train_file_path) // B)
 
 train_logger.info('Learning ended')
-try:
-    model.save('./models/')
-except ValueError:
-    try:
-        model.save('./models/firstone.keras') 
-    except ValueError:
-        print('Testing without saving')
+model.save('./models/firstone.keras') 
 
 # Evaluation of the model
 train_logger.info('Testing started')

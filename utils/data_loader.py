@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np 
 import logging
-from utils.logging import loggerFactory
+from utils.logging import logger_factory
 
 # Logging setup
-data_generator_logger = loggerFactory(
+data_generator_logger = logger_factory(
     name='data_generator_logger',
     file='logs/train_genrator.log'
 )

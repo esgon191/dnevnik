@@ -1,6 +1,6 @@
 import logging
 
-def loggerFactory(name : str, file : str, level=logging.DEBUG, mode='a'):
+def logger_factory(name : str, file : str, level=logging.DEBUG, mode='a'):
     logger = logging.getLogger(name=name)
 
     handler = logging.FileHandler(file, mode=mode)

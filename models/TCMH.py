@@ -1,8 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from utils.logging import logger_factory
 
 class TCMH(models.Model):
-    def __init__(self, input_shape, logger, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
+    def __init__(self, input_shape=None, logger=None, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
         super(TCMH, self).__init__()
 
         # Сохранение параметров модели
@@ -12,7 +13,14 @@ class TCMH(models.Model):
         self.filters = filters
         self.output_units = output_units
 
-        self.logger = logger
+        if logger == None:
+            self.logger = logger_factory(
+                name='model_logger',
+                file='logs/model.log'
+            )
+        else:
+            self.logger = logger
+
         self.num_sensors = num_sensors
         self.input_layers = [layers.Input(shape=input_shape) for _ in range(num_sensors)]
         
