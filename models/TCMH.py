@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, models
 
 class TCMH(models.Model):
-    def __init__(self, input_shape, logger, num_sensors=10, num_heads=8, filters=32, output_units=9):
+    def __init__(self, input_shape, logger, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
         super(TCMH, self).__init__()
 
         # Сохранение параметров модели
