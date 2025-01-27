@@ -82,17 +82,37 @@ train_logger.info('Learning started')
 model.fit(train_dataset, epochs=config.EPOCHS, steps_per_epoch=len(config.X_train_file_path) // B)
 
 train_logger.info('Learning ended')
-model.save('./')
+try:
+    model.save('./models/')
+except ValueError:
+    try:
+        model.save('./models/firstone.keras') 
+    except ValueError:
+        print('Testing without saving')
+
 # Evaluation of the model
 train_logger.info('Testing started')
+
+sql_iter_instance = SqlLoader(
+    host=dbconfig.HOST,
+    port='5432',
+    database=dbconfig.DB,
+    user=dbconfig.POSTGRES_USER,
+    password=dbconfig.POSTGRES_PASSWORD,
+    table='test_std',
+    batch_size=config.BATCH_SIZE,
+    X_columns=config.X_COLUMNS,
+    y_columns=config.Y_COLUMN
+)
+
+data_handler = lambda : iter(sql_iter_instance)
+
 test_dataset = tf.data.Dataset.from_generator(
     data_handler,
     output_signature
 ).batch(32).prefetch(tf.data.experimental.AUTOTUNE)
 
-loss, accuracy = model.evaluate(test_dataset, steps=len(config.test_file_paths) // B)
+loss, accuracy = model.evaluate(test_dataset)
 print(f'Test Loss: {loss}, Test Accuracy: {accuracy}')
 
 # Make predictions
-predictions = model.predict(test_dataset, steps=len(config.test_file_paths) // B)
-print('Predictions:', predictions)
