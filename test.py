@@ -1,0 +1,32 @@
+import config, dbconfig
+from utils.sql_loader import SqlLoader
+import tensorflow as tf
+
+sql_iter_instance = SqlLoader(
+    host=dbconfig.HOST,
+    port='5432',
+    database=dbconfig.DB,
+    user=dbconfig.POSTGRES_USER,
+    password=dbconfig.POSTGRES_PASSWORD,
+    table='test_std',
+    batch_size=config.BATCH_SIZE,
+    X_columns=config.X_COLUMNS,
+    y_columns=config.Y_COLUMN
+)
+
+output_signature = (
+    tuple(tf.TensorSpec(shape=(config.BATCH_SIZE, *config.INPUT_SHAPE), dtype=tf.float32) for _ in range(10)),
+    tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
+)
+
+model = tf.keras.models.load_model('models/firstone.keras')
+
+data_handler = lambda : iter(sql_iter_instance)
+
+test_dataset = tf.data.Dataset.from_generator(
+    data_handler,
+    output_signature
+).batch(32).prefetch(tf.data.experimental.AUTOTUNE)
+
+loss, accuracy = model.evaluate(test_dataset)
+print(f'Test Loss: {loss}, Test Accuracy: {accuracy}')
