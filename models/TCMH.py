@@ -21,6 +21,8 @@ class TCMH(models.Model):
         else:
             self.logger = logger
 
+        print(input_shape)
+
         self.num_sensors = num_sensors
         self.input_layers = [layers.Input(shape=input_shape) for _ in range(num_sensors)]
         
