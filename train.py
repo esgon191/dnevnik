@@ -4,6 +4,7 @@ from models.TCMH import TCMH
 from utils.data_loader import data_generator
 import utils.data_loader
 from utils.sql_loader import SqlLoader
+import datetime
 
 import importlib
 importlib.reload(utils.data_loader)
@@ -77,7 +78,8 @@ train_logger.info('Learning started')
 model.fit(train_dataset, epochs=config.EPOCHS, steps_per_epoch=len(config.X_train_file_path) // B)
 
 train_logger.info('Learning ended')
-model.save('./models/firstone.keras') 
+name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+model.save(f'./models/{name}.keras') 
 
 # Evaluation of the model
 train_logger.info('Testing started')
