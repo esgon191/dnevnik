@@ -5,7 +5,7 @@ from utils.logging import logger_factory
 class TCMH(models.Model):
     def __init__(self, input_shape=None, logger=None, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
         # Передаем kwargs в базовый класс
-        super(TCMH, self).__init__(**kwargs)
+        super(TCMH, self).__init__()
         
         # Если input_shape передан как TensorSpec, преобразуем его в кортеж
         if isinstance(input_shape, tf.TensorSpec):
