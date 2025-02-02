@@ -4,16 +4,21 @@ from utils.logging import logger_factory
 
 class TCMH(models.Model):
     def __init__(self, input_shape=None, logger=None, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
-        super(TCMH, self).__init__()
-
-        # Сохранение параметров модели
+        # Передаем kwargs в базовый класс
+        super(TCMH, self).__init__(**kwargs)
+        
+        # Если input_shape передан как TensorSpec, преобразуем его в кортеж
+        if isinstance(input_shape, tf.TensorSpec):
+            input_shape = tuple(input_shape.shape.as_list())
+        
+        # Сохранение параметров модели (теперь input_shape — кортеж, пригодный для сериализации)
         self.input_shape_param = input_shape
         self.num_sensors = num_sensors
         self.num_heads = num_heads
         self.filters = filters
         self.output_units = output_units
 
-        if logger == None:
+        if logger is None:
             self.logger = logger_factory(
                 name='model_logger',
                 file='logs/model.log'
@@ -21,65 +26,67 @@ class TCMH(models.Model):
         else:
             self.logger = logger
 
-        print(input_shape)
-
-        self.num_sensors = num_sensors
+        self.logger.info(f"Input shape: {input_shape}")
+        
+        # Если нужны входные слои (хотя они здесь не используются для вычислений),
+        # можно создать их для удобства (они не включаются в конфигурацию модели)
         self.input_layers = [layers.Input(shape=input_shape) for _ in range(num_sensors)]
         
-        # Temporal Convolutional Layers
-        self.conv1_layers = [layers.Conv1D(filters=filters, kernel_size=3, padding='causal', dilation_rate=1, activation='relu') for _ in range(num_sensors)]
-        self.conv2_layers = [layers.Conv1D(filters=filters, kernel_size=3, padding='causal', dilation_rate=2, activation='relu') for _ in range(num_sensors)]
+        # Temporal Convolutional Layers для каждого датчика
+        self.conv1_layers = [
+            layers.Conv1D(filters=filters, kernel_size=3, padding='causal', dilation_rate=1, activation='relu')
+            for _ in range(num_sensors)
+        ]
+        self.conv2_layers = [
+            layers.Conv1D(filters=filters, kernel_size=3, padding='causal', dilation_rate=2, activation='relu')
+            for _ in range(num_sensors)
+        ]
         self.pool_layers = [layers.MaxPooling1D(pool_size=2) for _ in range(num_sensors)]
         
         # Multi-Head Attention Layer
         self.multi_head_attention = layers.MultiHeadAttention(num_heads=num_heads, key_dim=filters)
         
-        # Convolutional Layer
+        # Дополнительные слои
         self.conv_layer = layers.Conv1D(filters=64, kernel_size=3, activation='relu', padding='same')
         self.max_pool = layers.MaxPooling1D(pool_size=2)
-        
-        # Global Average Pooling
         self.global_avg_pool = layers.GlobalAveragePooling1D()
-        
-        # Output Layer
         self.output_layer = layers.Dense(units=output_units, activation='softmax')
+        
         self.logger.info('initialized')
 
-    def __call__(self, inputs):
+    def call(self, inputs, training=None, **kwargs):
         conv_outputs = []
-        self.logger.debug('conv1d')
+        self.logger.debug('Применение Conv1D')
         for i in range(self.num_sensors):
             x = self.conv1_layers[i](inputs[i])
             x = self.conv2_layers[i](x)
             x = self.pool_layers[i](x)
             conv_outputs.append(x)
         
-        self.logger.debug('concatenation')
+        self.logger.debug('Конкатенация результатов')
         concat_layer = layers.Concatenate(axis=-1)(conv_outputs)
         
-        # Multi-Head Attention
-        self.logger.debug('multi-head attention')
+        self.logger.debug('Применение Multi-Head Attention')
         x = self.multi_head_attention(concat_layer, concat_layer)
         
-        # Convolutional Layer
-        self.logger.debug('convolution')
+        self.logger.debug('Применение свёрточного слоя')
         x = self.conv_layer(x)
 
-        self.logger.debug('max pooling')
+        self.logger.debug('Применение max pooling')
         x = self.max_pool(x)
         
-        # Global Average Pooling
-        self.logger.debug('global average pooling')
+        self.logger.debug('Применение Global Average Pooling')
         x = self.global_avg_pool(x)
         
-        # Output Layer
-        self.logger.info('returning')
+        self.logger.info('Возврат результата')
         return self.output_layer(x)
     
     def get_config(self):
+        # Получаем базовую конфигурацию модели
         config = super(TCMH, self).get_config()
+        # Обновляем конфигурацию только параметрами, необходимыми для восстановления модели.
         config.update({
-            "input_shape": self.input_shape_param,
+            "input_shape": self.input_shape_param,  # здесь кортеж, а не TensorSpec
             "num_sensors": self.num_sensors,
             "num_heads": self.num_heads,
             "filters": self.filters,
@@ -89,5 +96,5 @@ class TCMH(models.Model):
     
     @classmethod
     def from_config(cls, config):
+        # Восстанавливаем модель по конфигурации
         return cls(**config)
-
