@@ -19,7 +19,9 @@ output_signature = (
     tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
 )
 
-model = tf.keras.models.load_model('models/firstone.keras')
+savedmodel = input() # Путь к модели относительно этого файла
+
+model = tf.keras.models.load_model(savedmodel)
 
 data_handler = lambda : iter(sql_iter_instance)
 
