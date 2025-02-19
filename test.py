@@ -33,7 +33,5 @@ test_dataset = tf.data.Dataset.from_generator(
     output_signature=output_signature
 ).prefetch(tf.data.experimental.AUTOTUNE)
 
-test_dataset = test_dataset.take(10000)
-
 loss, accuracy = model.evaluate(test_dataset)
 print(f'Test Loss: {loss}, Test Accuracy: {accuracy}')
