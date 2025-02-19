@@ -19,7 +19,9 @@ output_signature = (
     tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
 )
 
-savedmodel = input() # Путь к модели относительно этого файла
+tf.config.threading.set_intra_op_parallelism_threads(10)
+
+savedmodel = input("Название модели") # Путь к модели относительно этого файла
 
 model = tf.keras.models.load_model(savedmodel)
 
