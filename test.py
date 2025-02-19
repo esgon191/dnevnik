@@ -33,5 +33,10 @@ test_dataset = tf.data.Dataset.from_generator(
     output_signature=output_signature
 ).prefetch(tf.data.experimental.AUTOTUNE)
 
-loss, accuracy = model.evaluate(test_dataset)
+@tf.function
+def evaluate_model(model, dataset):
+
+    return model.evaluate(dataset)
+
+loss, accuracy = evaluate_model(model, test_dataset)
 print(f'Test Loss: {loss}, Test Accuracy: {accuracy}')
