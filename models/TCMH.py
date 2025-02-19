@@ -3,7 +3,7 @@ from tensorflow.keras import layers, models
 from utils.logging import logger_factory
 
 class TCMH(models.Model):
-    def __init__(self, input_shape=None, logger=None, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
+    def __init__(self, input_shape=None, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
         # Передаем kwargs в базовый класс
         super(TCMH, self).__init__()
         
@@ -18,16 +18,6 @@ class TCMH(models.Model):
         self.filters = filters
         self.output_units = output_units
 
-        if logger is None:
-            self.logger = logger_factory(
-                name='model_logger',
-                file='logs/model.log'
-            )
-        else:
-            self.logger = logger
-
-        self.logger.info(f"Input shape: {input_shape}")
-        
         # Если нужны входные слои (хотя они здесь не используются для вычислений),
         # можно создать их для удобства (они не включаются в конфигурацию модели)
         self.input_layers = [layers.Input(shape=input_shape) for _ in range(num_sensors)]
@@ -52,33 +42,24 @@ class TCMH(models.Model):
         self.global_avg_pool = layers.GlobalAveragePooling1D()
         self.output_layer = layers.Dense(units=output_units, activation='softmax')
         
-        self.logger.info('initialized')
-
     def call(self, inputs, training=None, **kwargs):
         conv_outputs = []
-        self.logger.debug('Применение Conv1D')
         for i in range(self.num_sensors):
             x = self.conv1_layers[i](inputs[i])
             x = self.conv2_layers[i](x)
             x = self.pool_layers[i](x)
             conv_outputs.append(x)
         
-        self.logger.debug('Конкатенация результатов')
         concat_layer = layers.Concatenate(axis=-1)(conv_outputs)
         
-        self.logger.debug('Применение Multi-Head Attention')
         x = self.multi_head_attention(concat_layer, concat_layer)
         
-        self.logger.debug('Применение свёрточного слоя')
         x = self.conv_layer(x)
 
-        self.logger.debug('Применение max pooling')
         x = self.max_pool(x)
         
-        self.logger.debug('Применение Global Average Pooling')
         x = self.global_avg_pool(x)
         
-        self.logger.info('Возврат результата')
         return self.output_layer(x)
     
     def get_config(self):

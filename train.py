@@ -47,11 +47,6 @@ model.summary()
 
 train_logger.info('Model builded')
 
-output_signature = (
-    tuple(tf.TensorSpec(shape=(config.BATCH_SIZE, *config.INPUT_SHAPE), dtype=tf.float32) for _ in range(10)),
-    tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
-)
-
 sql_iter_instance = SqlLoader(
     host=dbconfig.HOST,
     port='5432',
@@ -62,6 +57,11 @@ sql_iter_instance = SqlLoader(
     batch_size=config.BATCH_SIZE,
     X_columns=config.X_COLUMNS,
     y_columns=config.Y_COLUMN
+)
+
+output_signature = (
+    tuple(tf.TensorSpec(shape=(config.BATCH_SIZE, *config.INPUT_SHAPE), dtype=tf.float32) for _ in range(10)),
+    tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
 )
 
 data_handler = lambda : iter(sql_iter_instance)
