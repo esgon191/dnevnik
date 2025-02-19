@@ -33,9 +33,10 @@ test_dataset = tf.data.Dataset.from_generator(
     output_signature=output_signature
 ).prefetch(tf.data.experimental.AUTOTUNE)
 
+test_dataset = test_dataset.take(10000)
+
 @tf.function
 def evaluate_model(model, dataset, steps=1000):
-
     return model.evaluate(dataset, steps=steps)
 
 loss, accuracy = evaluate_model(model, test_dataset)
