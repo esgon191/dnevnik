@@ -100,10 +100,8 @@ data_handler = lambda : iter(sql_iter_instance)
 
 test_dataset = tf.data.Dataset.from_generator(
     data_handler,
-    output_signature
-).batch(32).prefetch(tf.data.experimental.AUTOTUNE)
+    output_signature=output_signature
+).prefetch(tf.data.experimental.AUTOTUNE)
 
 loss, accuracy = model.evaluate(test_dataset)
 print(f'Test Loss: {loss}, Test Accuracy: {accuracy}')
-
-# Make predictions
