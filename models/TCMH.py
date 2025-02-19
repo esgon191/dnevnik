@@ -79,12 +79,3 @@ class TCMH(models.Model):
     def from_config(cls, config):
         # Восстанавливаем модель по конфигурации
         return cls(**config)
-
-    @classmethod
-    def build_from_config(cls, config):
-        # Создаем модель из конфигурации
-        model = cls(**config)
-        # Вызываем build с правильной входной формой:
-        # Предполагается, что config['input_shape'] — это кортеж, описывающий форму одного примера.
-        model.build((None, *config["input_shape"]))
-        return model
