@@ -25,19 +25,19 @@ tf.config.threading.set_inter_op_parallelism_threads(10)
 tf.config.threading.set_intra_op_parallelism_threads(10)
 
 
-# Define the model
+# Создание модели
 model = TCMH(
     input_shape=config.INPUT_SHAPE
 )
 
 train_logger.info('Created model')
 
-# Compile the model
+# Компиляция модели 
 model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
 train_logger.info('Compiled model')
 
-# Summary of the model
+# Сборка модели
 model.build([tf.TensorShape((500, 1)) for _ in range(10)])
 model.summary()
 
@@ -63,13 +63,13 @@ output_signature = (
 data_handler = lambda : iter(sql_iter_instance)
 
 train_logger.info('Dataset creation')
-# Create Dataset
+# Создание тренировочного датасета 
 train_dataset = tf.data.Dataset.from_generator(
     data_handler,
     output_signature=output_signature
 ).prefetch(tf.data.experimental.AUTOTUNE)
 
-# Training the model
+# Обучение модели
 train_logger.info('Learning started')
 model.fit(train_dataset, epochs=config.EPOCHS, steps_per_epoch=len(config.X_train_file_path) // B)
 
@@ -77,7 +77,7 @@ train_logger.info('Learning ended')
 name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 model.save(f'./models/{name}.keras') 
 
-# Evaluation of the model
+# Тестирование модели 
 train_logger.info('Testing started')
 
 sql_iter_instance = SqlLoader(
