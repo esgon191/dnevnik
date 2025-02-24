@@ -26,9 +26,7 @@ tf.config.threading.set_intra_op_parallelism_threads(10)
 
 
 # Создание модели
-model = TCMH(
-    input_shape=config.INPUT_SHAPE
-)
+model = TCMH()
 
 train_logger.info('Created model')
 
@@ -38,7 +36,6 @@ model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=
 train_logger.info('Compiled model')
 
 # Сборка модели
-model.build([tf.TensorShape((500, 1)) for _ in range(10)])
 model.summary()
 
 train_logger.info('Model builded')

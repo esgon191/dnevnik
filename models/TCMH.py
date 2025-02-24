@@ -1,18 +1,14 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
 from utils.logging import logger_factory
+import config
 
 class TCMH(models.Model):
-    def __init__(self, input_shape=None, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
+    def __init__(self, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
         # Передаем kwargs в базовый класс
         super(TCMH, self).__init__()
-        
-        # Если input_shape передан как TensorSpec, преобразуем его в кортеж
-        if isinstance(input_shape, tf.TensorSpec):
-            input_shape = tuple(input_shape.shape.as_list())
-        
+         
         # Сохранение параметров модели (теперь input_shape — кортеж, пригодный для сериализации)
-        self.input_shape_param = input_shape
         self.num_sensors = num_sensors
         self.num_heads = num_heads
         self.filters = filters
@@ -20,7 +16,7 @@ class TCMH(models.Model):
 
         # Если нужны входные слои (хотя они здесь не используются для вычислений),
         # можно создать их для удобства (они не включаются в конфигурацию модели)
-        self.input_layers = [layers.Input(shape=input_shape) for _ in range(num_sensors)]
+        self.input_layers = [layers.Input(shape=(500, 1)) for _ in range(num_sensors)]
         
         # Temporal Convolutional Layers для каждого датчика
         self.conv1_layers = [
