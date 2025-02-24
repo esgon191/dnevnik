@@ -1,6 +1,7 @@
 import config, dbconfig
 from utils.sql_loader import SqlLoader
 import tensorflow as tf
+from models import TCMH
 
 sql_iter_instance = SqlLoader(
     host=dbconfig.HOST,
@@ -22,9 +23,12 @@ output_signature = (
 tf.config.threading.set_intra_op_parallelism_threads(10)
 tf.config.threading.set_inter_op_parallelism_threads(10)
 
-savedmodel = input("Название модели: ") # Путь к модели относительно этого файла
+saved_weights = input("Название модели: ") # Путь к модели относительно этого файла
 
-model = tf.keras.models.load_model(savedmodel)
+# Восстановление весов модели
+model = TCMH()
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.load_weights(saved_weights)
 
 data_handler = lambda : iter(sql_iter_instance)
 
