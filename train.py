@@ -68,7 +68,7 @@ train_dataset = tf.data.Dataset.from_generator(
 
 # Обучение модели
 train_logger.info('Learning started')
-model.fit(train_dataset, epochs=config.EPOCHS, steps_per_epoch=len(config.X_train_file_path) // B)
+model.fit(train_dataset, epochs=config.EPOCHS)
 
 train_logger.info('Learning ended')
 name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
