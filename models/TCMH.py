@@ -63,7 +63,6 @@ class TCMH(models.Model):
         config = super(TCMH, self).get_config()
         # Обновляем конфигурацию только параметрами, необходимыми для восстановления модели.
         config.update({
-            "input_shape": self.input_shape_param,  # здесь кортеж, а не TensorSpec
             "num_sensors": self.num_sensors,
             "num_heads": self.num_heads,
             "filters": self.filters,
