@@ -72,7 +72,7 @@ model.fit(train_dataset, epochs=config.EPOCHS)
 
 train_logger.info('Learning ended')
 name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-model.save_weights(f'./models/{name}.h5') 
+model.save_weights(f'./models/{name}.weights.h5') 
 
 # Тестирование модели 
 train_logger.info('Testing started')
