@@ -1,7 +1,7 @@
 import config, dbconfig
 from utils.sql_loader import SqlLoader
 import tensorflow as tf
-from models import TCMH
+from models.TCMH import TCMH
 
 sql_iter_instance = SqlLoader(
     host=dbconfig.HOST,
