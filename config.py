@@ -1,7 +1,7 @@
 BATCH_SIZE = 32
 SEQUENCE_LENGTH = 500
 OVERLAP = 0 # SEQUENCE_LENGTH % OVERLAP = 0, OVERLAP < SEQUENCE_LENGTH 
-EPOCHS = 10
+EPOCHS = 20
 INPUT_SHAPE = (SEQUENCE_LENGTH, 1)
 X_COLUMNS = [
     'acceleration_x', 'acceleration_y', 'acceleration_z', 
