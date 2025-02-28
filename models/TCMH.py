@@ -58,19 +58,3 @@ class TCMH(models.Model):
         
         return self.output_layer(x)
     
-    def get_config(self):
-        # Получаем базовую конфигурацию модели
-        config = super(TCMH, self).get_config()
-        # Обновляем конфигурацию только параметрами, необходимыми для восстановления модели.
-        config.update({
-            "num_sensors": self.num_sensors,
-            "num_heads": self.num_heads,
-            "filters": self.filters,
-            "output_units": self.output_units,
-        })
-        return config
-    
-    @classmethod
-    def from_config(cls, config):
-        # Восстанавливаем модель по конфигурации
-        return cls(**config)
