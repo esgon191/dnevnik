@@ -31,10 +31,6 @@ args = parser.parse_args()
 print(f"Загружаем модель из {args.model}")
 model = tf.keras.models.load_model(args.model)
 
-weights = model.get_weights()
-for w in weights:
-    print(w.shape, w)
-
 data_handler = lambda : iter(sql_iter_instance)
 
 test_dataset = tf.data.Dataset.from_generator(
