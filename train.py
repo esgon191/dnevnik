@@ -74,6 +74,10 @@ train_logger.info('Learning ended')
 name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 model.save(f'./models/{name}') 
 
+weights = model.get_weights()
+for w in weights:
+    print(w.shape, w)
+
 # Тестирование модели 
 train_logger.info('Testing started')
 

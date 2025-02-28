@@ -26,6 +26,10 @@ savedmodel = input("Название модели: ") # Путь к модели
 
 model = tf.keras.models.load_model(savedmodel)
 
+weights = model.get_weights()
+for w in weights:
+    print(w.shape, w)
+
 data_handler = lambda : iter(sql_iter_instance)
 
 test_dataset = tf.data.Dataset.from_generator(
