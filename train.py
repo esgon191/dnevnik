@@ -71,8 +71,9 @@ train_logger.info('Learning started')
 model.fit(train_dataset, epochs=config.EPOCHS)
 
 train_logger.info('Learning ended')
-name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-model.save(f'./models/{name}') 
+#name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+name = 'savedmodel'
+model.save(f'./models/savedmodel/{name}') 
 
 weights = model.get_weights()
 for w in weights:
