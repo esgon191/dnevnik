@@ -40,6 +40,7 @@ model.summary()
 
 train_logger.info('Model builded')
 
+# Тренировочный датасет
 sql_iter_instance = SqlLoader(
     host=dbconfig.HOST,
     port='5432',
@@ -52,23 +53,49 @@ sql_iter_instance = SqlLoader(
     y_columns=config.Y_COLUMN
 )
 
+# Валидационный датасет (тестирование в процессе обучения) 
+sql_iter_instance_val = SqlLoader(
+    host=dbconfig.HOST,
+    port='5432',
+    database=dbconfig.DB,
+    user=dbconfig.POSTGRES_USER,
+    password=dbconfig.POSTGRES_PASSWORD,
+    table='val_std',  
+    batch_size=config.BATCH_SIZE,
+    X_columns=config.X_COLUMNS,
+    y_columns=config.Y_COLUMN
+)
+
+data_handler_val = lambda: iter(sql_iter_instance_val)
+data_handler = lambda : iter(sql_iter_instance)
+
 output_signature = (
     tuple(tf.TensorSpec(shape=(config.BATCH_SIZE, *config.INPUT_SHAPE), dtype=tf.float32) for _ in range(10)),
     tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
 )
 
-data_handler = lambda : iter(sql_iter_instance)
+train_logger.info('Validation dataset creation')
+
+val_dataset = tf.data.Dataset.from_generator(
+    data_handler_val,
+    output_signature=output_signature
+).prefetch(tf.data.experimental.AUTOTUNE)
 
 train_logger.info('Dataset creation')
-# Создание тренировочного датасета 
+
 train_dataset = tf.data.Dataset.from_generator(
     data_handler,
     output_signature=output_signature
 ).prefetch(tf.data.experimental.AUTOTUNE)
 
+
 # Обучение модели
 train_logger.info('Learning started')
-model.fit(train_dataset, epochs=config.EPOCHS)
+model.fit(
+    train_dataset,
+    epochs=config.EPOCHS,
+    validation_data=val_dataset  # передаем валидационный датасет
+)
 
 train_logger.info('Learning ended')
 name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
