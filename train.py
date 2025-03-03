@@ -73,20 +73,8 @@ model.fit(train_dataset, epochs=config.EPOCHS)
 train_logger.info('Learning ended')
 name = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 #name = 'savedmodel'
-try:
-    model.save(f'./models/{name}.keras') 
-except:
-    print("keras saving failed")
 
-try:
-    model.export('./models/savedmodel')
-except:
-    print("export saving failed")
-
-
-weights = model.get_weights()
-for w in weights:
-    print(w.shape, w)
+model.save(f'./models/{name}.keras') 
 
 # Тестирование модели 
 train_logger.info('Testing started')
