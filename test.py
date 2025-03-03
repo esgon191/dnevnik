@@ -1,23 +1,6 @@
 import config, dbconfig, argparse
-from utils.sql_loader import SqlLoader
+from utils.dataset_factory import sql_generator_dataset_factory
 import tensorflow as tf
-
-sql_iter_instance = SqlLoader(
-    host=dbconfig.HOST,
-    port='5432',
-    database=dbconfig.DB,
-    user=dbconfig.POSTGRES_USER,
-    password=dbconfig.POSTGRES_PASSWORD,
-    table='test_std',
-    batch_size=config.BATCH_SIZE,
-    X_columns=config.X_COLUMNS,
-    y_columns=config.Y_COLUMN
-)
-
-output_signature = (
-    tuple(tf.TensorSpec(shape=(config.BATCH_SIZE, *config.INPUT_SHAPE), dtype=tf.float32) for _ in range(10)),
-    tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
-)
 
 # Использовать 10 ядер процессора
 tf.config.threading.set_intra_op_parallelism_threads(10)
@@ -31,12 +14,11 @@ args = parser.parse_args()
 print(f"Загружаем модель из {args.model}")
 model = tf.keras.models.load_model(args.model)
 
-data_handler = lambda : iter(sql_iter_instance)
-
-test_dataset = tf.data.Dataset.from_generator(
-    data_handler,
-    output_signature=output_signature
-).prefetch(tf.data.experimental.AUTOTUNE)
+test_dataset = sql_generator_dataset_factory(
+    dbconfig, 
+    config,
+    'test_std'
+)
 
 loss, accuracy = model.evaluate(test_dataset)
 print(f'Test Loss: {loss}, Test Accuracy: {accuracy}')

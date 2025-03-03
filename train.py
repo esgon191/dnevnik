@@ -1,13 +1,7 @@
-import logging.config
 import tensorflow as tf
 from models.TCMH import TCMH
-from utils.data_loader import data_generator
-import utils.data_loader
-from utils.sql_loader import SqlLoader
+from utils.dataset_factory import sql_generator_dataset_factory 
 import datetime
-
-import importlib
-importlib.reload(utils.data_loader)
 
 import config
 import dbconfig
@@ -23,7 +17,6 @@ train_logger = logger_factory(
 # Ограничить количество потоков
 tf.config.threading.set_inter_op_parallelism_threads(10)
 tf.config.threading.set_intra_op_parallelism_threads(10)
-
 
 # Создание модели
 model = TCMH()
@@ -41,53 +34,20 @@ model.summary()
 train_logger.info('Model builded')
 
 # Тренировочный датасет
-sql_iter_instance = SqlLoader(
-    host=dbconfig.HOST,
-    port='5432',
-    database=dbconfig.DB,
-    user=dbconfig.POSTGRES_USER,
-    password=dbconfig.POSTGRES_PASSWORD,
-    table='train_std',
-    batch_size=config.BATCH_SIZE,
-    X_columns=config.X_COLUMNS,
-    y_columns=config.Y_COLUMN
+train_logger.info('Traun dataset creation')
+train_dataset = sql_generator_dataset_factory(
+    dbconfig,
+    config, 
+    'train_std'
 )
 
-# Валидационный датасет (тестирование в процессе обучения) 
-sql_iter_instance_val = SqlLoader(
-    host=dbconfig.HOST,
-    port='5432',
-    database=dbconfig.DB,
-    user=dbconfig.POSTGRES_USER,
-    password=dbconfig.POSTGRES_PASSWORD,
-    table='val_std',  
-    batch_size=config.BATCH_SIZE,
-    X_columns=config.X_COLUMNS,
-    y_columns=config.Y_COLUMN
-)
-
-data_handler_val = lambda: iter(sql_iter_instance_val)
-data_handler = lambda : iter(sql_iter_instance)
-
-output_signature = (
-    tuple(tf.TensorSpec(shape=(config.BATCH_SIZE, *config.INPUT_SHAPE), dtype=tf.float32) for _ in range(10)),
-    tf.TensorSpec(shape=(config.BATCH_SIZE, 1), dtype=tf.int32),
-)
-
+# Валидационный датасет 
 train_logger.info('Validation dataset creation')
-
-val_dataset = tf.data.Dataset.from_generator(
-    data_handler_val,
-    output_signature=output_signature
-).prefetch(tf.data.experimental.AUTOTUNE)
-
-train_logger.info('Dataset creation')
-
-train_dataset = tf.data.Dataset.from_generator(
-    data_handler,
-    output_signature=output_signature
-).prefetch(tf.data.experimental.AUTOTUNE)
-
+val_dataset = sql_generator_dataset_factory(
+    dbconfig,
+    config, 
+    'val_std'
+) 
 
 # Обучение модели
 train_logger.info('Learning started')
@@ -106,24 +66,11 @@ model.save(f'./models/{name}.keras')
 # Тестирование модели 
 train_logger.info('Testing started')
 
-sql_iter_instance = SqlLoader(
-    host=dbconfig.HOST,
-    port='5432',
-    database=dbconfig.DB,
-    user=dbconfig.POSTGRES_USER,
-    password=dbconfig.POSTGRES_PASSWORD,
-    table='test_std',
-    batch_size=config.BATCH_SIZE,
-    X_columns=config.X_COLUMNS,
-    y_columns=config.Y_COLUMN
+test_dataset = sql_generator_dataset_factory(
+    dbconfig, 
+    config,
+    'test_std'
 )
-
-data_handler = lambda : iter(sql_iter_instance)
-
-test_dataset = tf.data.Dataset.from_generator(
-    data_handler,
-    output_signature=output_signature
-).prefetch(tf.data.experimental.AUTOTUNE)
 
 loss, accuracy = model.evaluate(test_dataset)
 print(f'Test Loss: {loss}, Test Accuracy: {accuracy}')
