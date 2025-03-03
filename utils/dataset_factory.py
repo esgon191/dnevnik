@@ -1,4 +1,4 @@
-from sql_loader import SqlLoader
+from utils.sql_loader import SqlLoader
 import tensorflow as tf
 
 def sql_generator_dataset_factory(dbconfig, config, table : str):
