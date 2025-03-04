@@ -65,17 +65,6 @@ class SqlLoader:
                 query = f"SELECT * FROM {self.table} WHERE batch_id = '{batch_id}';"
                 result = pd.read_sql_query(query, self.engine)
 
-                # Костыль на избегание батчей, длина которых != 500
-                # По идее их не должно быть, но на практике встречаются 
-                # Их примерно 120/160000 т.е. < 0.1%
-                while len(result) != 500:
-                    batch_id = self.batch_ids[self.current]
-                    self.current += 1
-
-                    # Выполняем запрос для текущего batch_id
-                    query = f"SELECT * FROM {self.table} WHERE batch_id = '{batch_id}';"
-                    result = pd.read_sql_query(query, self.engine)
-
             else:
                 raise StopIteration
 
