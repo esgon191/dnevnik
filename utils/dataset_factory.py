@@ -25,7 +25,7 @@ def sql_generator_dataset_factory(
 
     # Сколько шагов за один проход по датасету получит модель 
     # обучающих объектов // размер батча
-    steps_per_epoch = sql_iter_instance.steps_per_epoch()
+    steps_per_epoch = sql_iter_instance.steps_per_epoch
 
     # На каждой новой эпохе tf пытается получить новый генератор через метод __call__()
     # В будущем перенесу это прямо в функционал SqlLoader

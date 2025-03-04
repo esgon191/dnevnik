@@ -39,6 +39,9 @@ class SqlLoader:
         # Количество обучающих примеров в датасете
         self.amount_of_samples = len(self.batch_ids)
 
+        # Шагов за проход генератора
+        self.steps_per_epoch = self.__steps_per_epoch()
+
     def connect(self):        
         connection_string = f"postgresql+psycopg2://{dbconfig.POSTGRES_USER}:{dbconfig.POSTGRES_PASSWORD}@{dbconfig.HOST}:5432/{dbconfig.DB}"
         engine = create_engine(connection_string)
@@ -55,27 +58,28 @@ class SqlLoader:
         X_batch = list()
         y_batch = list()
             
-        for i in range(self.batch_size):
-            if self.current < len(self.batch_ids):
+        if self.current < self.steps_per_epoch:
+            for i in range(self.batch_size):
                 # Получаем текущий batch_id
                 batch_id = self.batch_ids[self.current]
-                self.current += 1
 
                 # Выполняем запрос для текущего batch_id
                 query = f"SELECT * FROM {self.table} WHERE batch_id = '{batch_id}';"
                 result = pd.read_sql_query(query, self.engine)
 
-            else:
-                raise StopIteration
+                X_chunk = result[self.X_columns].values
+                y_chunk = result[self.y_columns].values[-1]
 
-            X_chunk = result[self.X_columns].values
-            y_chunk = result[self.y_columns].values[-1]
+                X_chunk = X_chunk.reshape(1, 500, 10)        
+                X_batch.append(X_chunk.copy())
 
-            X_chunk = X_chunk.reshape(1, 500, 10)        
-            X_batch.append(X_chunk.copy())
+                y_chunk = y_chunk.reshape(1, 1)
+                y_batch.append(y_chunk.copy())
 
-            y_chunk = y_chunk.reshape(1, 1)
-            y_batch.append(y_chunk.copy())
+                self.current += 1
+                
+        else:
+            raise StopIteration
 
 
         X_batch = np.concatenate(X_batch, axis=0)
@@ -85,7 +89,7 @@ class SqlLoader:
         
         return (X_batch, y_batch)
 
-    def steps_per_epoch(self):
+    def __steps_per_epoch(self):
         """
         Возвращает количество отдаваемых батчей один проход генератора 
         Один проход генератора = одна эпоха
