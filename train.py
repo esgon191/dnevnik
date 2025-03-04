@@ -35,7 +35,7 @@ train_logger.info('Model builded')
 
 # Тренировочный датасет
 train_logger.info('Traun dataset creation')
-train_dataset = sql_generator_dataset_factory(
+train_dataset, train_steps = sql_generator_dataset_factory(
     dbconfig,
     config, 
     'train_std'
@@ -43,7 +43,7 @@ train_dataset = sql_generator_dataset_factory(
 
 # Валидационный датасет 
 train_logger.info('Validation dataset creation')
-val_dataset = sql_generator_dataset_factory(
+val_dataset, val_steps = sql_generator_dataset_factory(
     dbconfig,
     config, 
     'val_std'
@@ -54,7 +54,9 @@ train_logger.info('Learning started')
 model.fit(
     train_dataset,
     epochs=config.EPOCHS,
-    validation_data=val_dataset  # передаем валидационный датасет
+    validation_data=val_dataset,  # передаем валидационный датасет
+    steps_per_epoch=train_steps, # Шагов за эпоху
+    validation_steps=val_steps # Валидационных шагов
 )
 
 train_logger.info('Learning ended')

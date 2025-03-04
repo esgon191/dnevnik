@@ -36,6 +36,9 @@ class SqlLoader:
         query = f"SELECT DISTINCT batch_id FROM {self.table};"
         self.batch_ids = pd.read_sql_query(query, self.engine)['batch_id'].values
 
+        # Количество обучающих примеров в датасете
+        self.amount_of_samples = len(self.batch_ids)
+
     def connect(self):        
         connection_string = f"postgresql+psycopg2://{dbconfig.POSTGRES_USER}:{dbconfig.POSTGRES_PASSWORD}@{dbconfig.HOST}:5432/{dbconfig.DB}"
         engine = create_engine(connection_string)
@@ -81,3 +84,10 @@ class SqlLoader:
         X_batch = tuple(np.split(X_batch, axis=2, indices_or_sections=10))
         
         return (X_batch, y_batch)
+
+    def steps_per_epoch(self):
+        """
+        Возвращает количество отдаваемых батчей один проход генератора 
+        Один проход генератора = одна эпоха
+        """
+        return self.amount_of_samples // self.batch_size 

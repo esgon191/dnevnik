@@ -1,7 +1,11 @@
 from utils.sql_loader import SqlLoader
 import tensorflow as tf
 
-def sql_generator_dataset_factory(dbconfig, config, table : str):
+def sql_generator_dataset_factory(
+            dbconfig, # Конфиг подключения к базе данных
+            config, # Тренировочный конфиг
+            table : str, # Таблица, откуда брать данные
+            ):
     """
     Фабрика для создания датасетов из SqlLoader на основе tf.data.Dataset.from_generator
     """
@@ -19,6 +23,10 @@ def sql_generator_dataset_factory(dbconfig, config, table : str):
         y_columns=config.Y_COLUMN
     )
 
+    # Сколько шагов за один проход по датасету получит модель 
+    # обучающих объектов // размер батча
+    steps_per_epoch = sql_iter_instance.steps_per_epoch()
+
     # На каждой новой эпохе tf пытается получить новый генератор через метод __call__()
     # В будущем перенесу это прямо в функционал SqlLoader
     data_handler = lambda : iter(sql_iter_instance)
@@ -32,7 +40,7 @@ def sql_generator_dataset_factory(dbconfig, config, table : str):
     # Создание датасета 
     dataset = tf.data.Dataset.from_generator(
         data_handler,
-        output_signature=output_signature
+        output_signature=output_signature,
     ).prefetch(tf.data.experimental.AUTOTUNE)
 
-    return dataset
+    return dataset, steps_per_epoch
