@@ -36,9 +36,6 @@ class SqlLoader:
         query = f"SELECT DISTINCT batch_id FROM {self.table};"
         self.batch_ids = pd.read_sql_query(query, self.engine)['batch_id'].values
 
-        # Дополнительное перемешивание
-        np.random.shuffle(self.batch_ids)
-
     def connect(self):        
         connection_string = f"postgresql+psycopg2://{dbconfig.POSTGRES_USER}:{dbconfig.POSTGRES_PASSWORD}@{dbconfig.HOST}:5432/{dbconfig.DB}"
         engine = create_engine(connection_string)
