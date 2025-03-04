@@ -76,7 +76,7 @@ class SqlLoader:
                 y_chunk = y_chunk.reshape(1, 1)
                 y_batch.append(y_chunk.copy())
 
-                self.current += 1
+            self.current += 1
                 
         else:
             raise StopIteration
