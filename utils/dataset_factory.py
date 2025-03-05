@@ -5,7 +5,7 @@ def sql_generator_dataset_factory(
             dbconfig, # Конфиг подключения к базе данных
             config, # Тренировочный конфиг
             table : str, # Таблица, откуда брать данные
-            ):
+            ) -> tuple[tf.data.Dataset, int]: # Датасет и количество шагов за датасет
     """
     Фабрика для создания датасетов из SqlLoader на основе tf.data.Dataset.from_generator
     """

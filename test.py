@@ -14,7 +14,7 @@ args = parser.parse_args()
 print(f"Загружаем модель из {args.model}")
 model = tf.keras.models.load_model(args.model)
 
-test_dataset = sql_generator_dataset_factory(
+test_dataset, test_steps = sql_generator_dataset_factory(
     dbconfig, 
     config,
     'test_std'
