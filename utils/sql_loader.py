@@ -59,9 +59,11 @@ class SqlLoader:
         y_batch = list()
             
         if self.current < self.steps_per_epoch:
-            for i in range(self.batch_size):
+            for step_in_batch in range(self.batch_size):
                 # Получаем текущий batch_id
-                batch_id = self.batch_ids[self.current]
+                # Так как current - счетчик шагов за эпоху, то номер объекта вычисляется как:
+                # Текущий шаг за эпоху * размер батча + текущий объект внутри формируемого батча
+                batch_id = self.batch_ids[self.current * self.batch_size + step_in_batch]
 
                 # Выполняем запрос для текущего batch_id
                 query = f"SELECT * FROM {self.table} WHERE batch_id = '{batch_id}';"
