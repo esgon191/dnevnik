@@ -4,15 +4,22 @@ from utils.logging import logger_factory
 import config
 
 class TCMH(models.Model):
-    def __init__(self, num_sensors=10, num_heads=8, filters=32, output_units=9, **kwargs):
+    def __init__(self, 
+                 num_sensors=10, 
+                 num_heads=8, 
+                 filters=32, 
+                 output_units=9, 
+                 conv1d_kernel_size=2, 
+            **kwargs):
         # Передаем kwargs в базовый класс
         super(TCMH, self).__init__()
          
-        # Сохранение параметров модели (теперь input_shape — кортеж, пригодный для сериализации)
+        # Сохранение параметров модели 
         self.num_sensors = num_sensors
         self.num_heads = num_heads
         self.filters = filters
         self.output_units = output_units
+        self.conv1d_kernel_size = conv1d_kernel_size
 
         # Если нужны входные слои (хотя они здесь не используются для вычислений),
         # можно создать их для удобства (они не включаются в конфигурацию модели)
@@ -20,11 +27,15 @@ class TCMH(models.Model):
         
         # Temporal Convolutional Layers для каждого датчика
         self.conv1_layers = [
-            layers.Conv1D(filters=filters, kernel_size=3, padding='causal', dilation_rate=1, activation='relu')
+            layers.Conv1D(filters=filters, kernel_size=self.conv1d_kernel_size, padding='dilation', dilation_rate=1, activation='relu')
             for _ in range(num_sensors)
         ]
         self.conv2_layers = [
-            layers.Conv1D(filters=filters, kernel_size=3, padding='causal', dilation_rate=2, activation='relu')
+            layers.Conv1D(filters=filters, kernel_size=self.conv1d_kernel_size, padding='dilation', dilation_rate=2, activation='relu')
+            for _ in range(num_sensors)
+        ]
+        self.conv3_layers = [
+            layers.Conv1D(filters=filters, kernel_size=self.conv1d_kernel_size, padding='dilation', dilation_rate=4, activation='relu')
             for _ in range(num_sensors)
         ]
         self.pool_layers = [layers.MaxPooling1D(pool_size=2) for _ in range(num_sensors)]
@@ -43,6 +54,7 @@ class TCMH(models.Model):
         for i in range(self.num_sensors):
             x = self.conv1_layers[i](inputs[i])
             x = self.conv2_layers[i](x)
+            x = self.conv3_layers[i](x)
             x = self.pool_layers[i](x)
             conv_outputs.append(x)
         
