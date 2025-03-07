@@ -68,7 +68,7 @@ model.save(f'./models/{name}.keras')
 # Тестирование модели 
 train_logger.info('Testing started')
 
-test_dataset = sql_generator_dataset_factory(
+test_dataset, test_steps = sql_generator_dataset_factory(
     dbconfig, 
     config,
     'test_std'
