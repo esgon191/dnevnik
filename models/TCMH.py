@@ -27,15 +27,33 @@ class TCMH(models.Model):
         
         # Temporal Convolutional Layers для каждого датчика
         self.conv1_layers = [
-            layers.Conv1D(filters=filters, kernel_size=self.conv1d_kernel_size, padding='dilation', dilation_rate=1, activation='relu')
+            layers.Conv1D(
+                filters=filters, 
+                kernel_size=self.conv1d_kernel_size, 
+                padding='causal', 
+                dilation_rate=1, 
+                activation='relu'
+                )
             for _ in range(num_sensors)
         ]
         self.conv2_layers = [
-            layers.Conv1D(filters=filters, kernel_size=self.conv1d_kernel_size, padding='dilation', dilation_rate=2, activation='relu')
+            layers.Conv1D(
+                filters=filters, 
+                kernel_size=self.conv1d_kernel_size, 
+                padding='causal', 
+                dilation_rate=2, 
+                activation='relu'
+                )
             for _ in range(num_sensors)
         ]
         self.conv3_layers = [
-            layers.Conv1D(filters=filters, kernel_size=self.conv1d_kernel_size, padding='dilation', dilation_rate=4, activation='relu')
+            layers.Conv1D(
+                filters=filters, 
+                kernel_size=self.conv1d_kernel_size, 
+                padding='causal', 
+                dilation_rate=4, 
+                activation='relu'
+            )
             for _ in range(num_sensors)
         ]
         self.pool_layers = [layers.MaxPooling1D(pool_size=2) for _ in range(num_sensors)]
