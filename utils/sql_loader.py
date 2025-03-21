@@ -41,8 +41,13 @@ class SqlLoader:
         # Движок подключения к бд
         self.engine = self.connect()
 
+        # Формируем часть запроса с фильтром на выборку
+        strat_part = ''
+        if self.stratification_attr_name is not None:
+            strat_part = f'WHERE {self.stratification_attr_name} = {self.stratification_attr}'
+
         # Запрос уникальных батч айди для последующего итерирования по ним
-        query = f"SELECT DISTINCT {self.batch_id_name} FROM {self.table};"
+        query = f"SELECT DISTINCT {self.batch_id_name} FROM {self.table} {strat_part};"
         self.batch_ids = pd.read_sql_query(query, self.engine)[self.batch_id_name].values
 
         # Количество обучающих примеров в датасете
@@ -74,13 +79,8 @@ class SqlLoader:
                 # Текущий шаг за эпоху * размер батча + текущий объект внутри формируемого батча
                 batch_id = self.batch_ids[self.current * self.batch_size + step_in_batch]
 
-                # Формируем часть запроса с фильтром на выборку
-                strat_part = ''
-                if self.stratification_attr_name is not None:
-                    strat_part = f'AND {self.stratification_attr_name} = {self.stratification_attr}'
-
                 # Выполняем запрос для текущего batch_id
-                query = f"SELECT * FROM {self.table} WHERE {self.batch_id_name} = {batch_id} {strat_part};"
+                query = f"SELECT * FROM {self.table} WHERE {self.batch_id_name} = {batch_id};"
                 result = pd.read_sql_query(query, self.engine)
 
                 X_chunk = result[self.X_columns].values
