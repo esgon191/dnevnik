@@ -86,6 +86,9 @@ class SqlLoader:
                 X_chunk = result[self.X_columns].values
                 y_chunk = result[self.y_columns].values[-1]
 
+                if len(X_chunk) > 500:
+                    X_chunk = X_chunk[:500]
+
                 X_chunk = X_chunk.reshape(1, 500, 10)        
                 X_batch.append(X_chunk.copy())
 
