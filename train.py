@@ -38,7 +38,10 @@ train_logger.info('Traun dataset creation')
 train_dataset, train_steps = sql_generator_dataset_factory(
     dbconfig,
     config, 
-    'train_std'
+    'new_objects_assigned',
+    stratification_attr_name='train_0_test_1_val_2',
+    stratification_attr=0,
+    batch_id_name='object_id'
 )
 
 # Валидационный датасет 
@@ -71,7 +74,10 @@ train_logger.info('Testing started')
 test_dataset, test_steps = sql_generator_dataset_factory(
     dbconfig, 
     config,
-    'test_std'
+    'new_objects_assigned',
+    stratification_attr_name='train_0_test_1_val_2',
+    stratification_attr=1,
+    batch_id_name='object_id'
 )
 
 loss, accuracy = model.evaluate(test_dataset)

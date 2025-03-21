@@ -4,7 +4,10 @@ import tensorflow as tf
 def sql_generator_dataset_factory(
             dbconfig, # Конфиг подключения к базе данных
             config, # Тренировочный конфиг
-            table : str, # Таблица, откуда брать данные
+            table : str, # Таблица, откуда брать данные 
+            batch_id_name='batch_id',
+            stratification_attr_name=None,
+            stratification_attr=None
             ) -> tuple[tf.data.Dataset, int]: # Датасет и количество шагов за датасет
     """
     Фабрика для создания датасетов из SqlLoader на основе tf.data.Dataset.from_generator
@@ -20,7 +23,10 @@ def sql_generator_dataset_factory(
         table=table,
         batch_size=config.BATCH_SIZE,
         X_columns=config.X_COLUMNS,
-        y_columns=config.Y_COLUMN
+        y_columns=config.Y_COLUMN,
+        batch_id_name=batch_id_name,
+        stratification_attr_name=stratification_attr_name,
+        stratification_attr=stratification_attr
     )
 
     # Сколько шагов за один проход по датасету получит модель 
