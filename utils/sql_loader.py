@@ -16,7 +16,10 @@ class SqlLoader:
                  table : str,
                  batch_size : int,
                  X_columns : list,
-                 y_columns: list):
+                 y_columns: list,
+                 batch_id_name='batch_id',
+                 stratification_attr_name=None,
+                 stratification_attr=None):
         self.host = host
         self.port = port
         self.database = database
@@ -26,6 +29,12 @@ class SqlLoader:
         self.batch_size = batch_size
         self.X_columns = X_columns
         self.y_columns = y_columns
+        # По какому полю столбцу определен конкретный обучающий объект
+        self.batch_id_name = batch_id_name
+        # Дополнительный фильтр, по которому производится заброс к нужной выборке из таблицы
+        self.stratification_attr_name = stratification_attr_name
+        # Значение фильтра выборки
+        self.stratification_attr = stratification_attr 
 
         self.current = 0
 
@@ -33,8 +42,8 @@ class SqlLoader:
         self.engine = self.connect()
 
         # Запрос уникальных батч айди для последующего итерирования по ним
-        query = f"SELECT DISTINCT batch_id FROM {self.table};"
-        self.batch_ids = pd.read_sql_query(query, self.engine)['batch_id'].values
+        query = f"SELECT DISTINCT {self.batch_id_name} FROM {self.table};"
+        self.batch_ids = pd.read_sql_query(query, self.engine)[self.batch_id_name].values
 
         # Количество обучающих примеров в датасете
         self.amount_of_samples = len(self.batch_ids)
@@ -65,8 +74,13 @@ class SqlLoader:
                 # Текущий шаг за эпоху * размер батча + текущий объект внутри формируемого батча
                 batch_id = self.batch_ids[self.current * self.batch_size + step_in_batch]
 
+                # Формируем часть запроса с фильтром на выборку
+                strat_part = ''
+                if self.stratification_attr_name is not None:
+                    strat_part = f'AND {self.stratification_attr_name} = {self.stratification_attr}'
+
                 # Выполняем запрос для текущего batch_id
-                query = f"SELECT * FROM {self.table} WHERE batch_id = '{batch_id}';"
+                query = f"SELECT * FROM {self.table} WHERE {self.batch_id_name} = {batch_id} {strat_part};"
                 result = pd.read_sql_query(query, self.engine)
 
                 X_chunk = result[self.X_columns].values
