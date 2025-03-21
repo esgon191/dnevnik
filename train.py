@@ -49,7 +49,10 @@ train_logger.info('Validation dataset creation')
 val_dataset, val_steps = sql_generator_dataset_factory(
     dbconfig,
     config, 
-    'val_std'
+    'new_objects_assigned',
+    stratification_attr_name='train_0_test_1_val_2',
+    stratification_attr=0,
+    batch_id_name='object_id'
 ) 
 
 # Обучение модели
