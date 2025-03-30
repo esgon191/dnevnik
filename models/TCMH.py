@@ -58,6 +58,9 @@ class TCMH(models.Model):
         ]
         self.pool_layers = [layers.MaxPooling1D(pool_size=2) for _ in range(num_sensors)]
         
+        # Батч-нормализация
+        self.bn_layers = [layers.BatchNormalization() for _ in range(num_sensors)]
+
         # Multi-Head Attention Layer
         self.multi_head_attention = layers.MultiHeadAttention(num_heads=num_heads, key_dim=filters)
         
@@ -74,6 +77,8 @@ class TCMH(models.Model):
             x = self.conv2_layers[i](x)
             x = self.conv3_layers[i](x)
             x = self.pool_layers[i](x)
+            x = self.bn_layers[i](x, training=training)
+
             conv_outputs.append(x)
         
         concat_layer = layers.Concatenate(axis=-1)(conv_outputs)
