@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.keras.callbacks import TensorBoard
 from models.TCMH import TCMH
 from utils.dataset_factory import sql_generator_dataset_factory 
 import datetime
@@ -12,6 +13,14 @@ train_logger = logger_factory(
     name='train_logger',
     file='logs/train.log'
 ) 
+
+# Настройка Tensorboard
+tensorboard_callback = TensorBoard(
+    log_dir="logs/tensorboard",  # путь к директории для логов
+    histogram_freq=1,            # записывать гистограммы каждые 1 эпоху
+    write_graph=True,            # сохранить граф модели
+    update_freq="epoch"          # обновлять логи каждые эпоху
+)
 
 # Настройка tensorflow на работу на 10 ядрах
 # Ограничить количество потоков
@@ -62,7 +71,8 @@ model.fit(
     epochs=config.EPOCHS,
     validation_data=val_dataset,  # передаем валидационный датасет
     steps_per_epoch=train_steps, # Шагов за эпоху
-    validation_steps=val_steps # Валидационных шагов
+    validation_steps=val_steps, # Валидационных шагов
+    callbacks=[tensorboard_callback] # Подключение tensorboard
 )
 
 train_logger.info('Learning ended')
