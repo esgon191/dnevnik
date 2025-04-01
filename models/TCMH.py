@@ -6,7 +6,7 @@ import config
 class TCMH(models.Model):
     def __init__(self, 
                  num_sensors=10, 
-                 num_heads=8, 
+                 num_heads=5, 
                  filters=32, 
                  output_units=9, 
                  conv1d_kernel_size=2, 
